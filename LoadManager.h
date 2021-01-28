@@ -1,54 +1,46 @@
 #pragma once
 #include "singleton.h"
-struct Texture
+#include "Render3DManager.h"
+struct MultiMesh
 {
 public:
-	LPDIRECT3DTEXTURE9 texturePtr;
-	D3DXIMAGE_INFO info;
-public:
-	Texture(LPDIRECT3DTEXTURE9 texturePtr, D3DXIMAGE_INFO info)
-		:texturePtr(texturePtr), info(info)
+	CDXUTTimer* timer;
+	MultiMesh() { timer = new CDXUTTimer; }
+	~MultiMesh() { SAFE_DELETE(timer) for (auto iter : v_mesh)SAFE_DELETE(iter); v_mesh.clear(); };
+	vector<Mesh*>v_mesh;
+	int a = 1;
+	int i = 0;
+
+	void Render(float Frame, Transform ts)
 	{
-	}
-	~Texture()
-	{
-	}
-};
-struct MultiTexture
-{
-public:
-	list<Texture*> l_Texture;
-	
-public:
-	MultiTexture(Texture * texturePtr)
-	{
-		l_Texture.push_back(texturePtr);
+		if (a == 1)
+		{
+			timer->Start();
+			a--;
+		}
+		RENDER3D->Render(v_mesh[i], ts);
+		if (Frame < timer->GetTime())
+		{
+			timer->Reset();
+			i++;
+		}
+		if (i >= v_mesh.size())
+		{
+			i = 0;
+		}
 	}
 
-	~MultiTexture()
-	{
-	}
-};
-struct Mesh
-{
-public:
-	LPD3DXMESH pMesh;
-	vector<Material*> v_Matrial;
-public:
-	Mesh() {}
-	~Mesh()
-	{
-		SAFE_DELETE(pMesh);
-		v_Matrial.clear();
-	}
 
 };
+
 class LoadManager :public singleton<LoadManager>
 {
 private:
 	map <string, Texture*>m_Texture;
 	map <string, MultiTexture*> m_MultiTexture;
-	map <string,Mesh*> m_Mesh;
+	map <string, Mesh*> m_Mesh;
+	map <string, MultiMesh*> m_MultiMesh;
+	cMeshLoader* Loader;
 public:
 	LoadManager();
 	~LoadManager();
@@ -57,10 +49,13 @@ public:
 	MultiTexture* AddImages(const string& key, const string& path, int count = 0);
 
 	Texture* FindImage(const string& key);
-	MultiTexture* FindImages(const string& key,int count = 0);
+	MultiTexture* FindImages(const string& key, int count = 0);
 
-	Mesh* AddMesh(const string& key, const wstring& strFilename);
-	Mesh* FindMesh(const string & key);
+	Mesh* AddMesh(const string& key, string strFilename);
+	MultiMesh* AddMeshs(const string& key, string strFilename, int count);
+	Mesh* FindMesh(const string& key);
+	MultiMesh* FindMeshs(const string& key);
+
 };
 
 #define LOADER LoadManager::GetInstance()

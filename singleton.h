@@ -12,14 +12,12 @@ public:
 	~singleton() {};
 	static T* GetInstance()
 	{
-		std::lock_guard lock(m);
 		if (!p)
 			p = new T;
 		return p;
 	}
 	static void ReleaseIntacne()
 	{
-		std::lock_guard lock(m);
 		if (p)
 			delete p;
 		p = nullptr;

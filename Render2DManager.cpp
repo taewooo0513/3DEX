@@ -10,6 +10,7 @@ Render2DManager::Render2DManager()
 Render2DManager::~Render2DManager()
 {
 	Sprite->Release();
+	SAFE_DELETE(timer);
 }
 
 void Render2DManager::Begin()

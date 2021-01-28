@@ -1,0 +1,2 @@
+C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Debug\FPS_3D.exe
+C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Debug\FPS_3D.pdb

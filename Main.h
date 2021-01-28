@@ -3,6 +3,11 @@ class Main
 {
 private:
 	Mesh* mesh;
+	Texture* text;
+	float x=0;
+	float y=0;
+	MultiMesh* meshs;
+	Transform ts;
 public:
 	Main();
 	~Main();

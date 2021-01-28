@@ -3,11 +3,27 @@
 class Render3DManager : public singleton<Render3DManager>
 {
 private:
+	D3DXQUATERNION q;
+
+	struct sVerTex
+	{
+		D3DXVECTOR3 Pos;
+		D3DXVECTOR2 uv;
+		D3DXVECTOR3 normal;
+		inline static constexpr DWORD FVF = D3DFVF_XYZ | D3DFVF_NORMAL | D3DFVF_TEX1;
+	};
+	CDXUTTimer* timer = new CDXUTTimer;
+
+	LPDIRECT3DVERTEXBUFFER9 vb;
+	LPDIRECT3DINDEXBUFFER9 ib;
+	D3DXMATRIXA16 matProj;
 public:
 	Render3DManager();
 	~Render3DManager();
 public:
-	void Render(Mesh * mesh,Vec3 pos, Vec3 rot = Vec3(0, 0, 0),Vec3 size = Vec3(1,1,1) ,D3DXCOLOR color = D3DCOLOR_XRGB(255,255,255));
+	void Render(Mesh* mesh, Transform transform);
+	void BackRender(Mesh* mesh, Transform transform);
+
 };
 
 #define RENDER3D Render3DManager::GetInstance()

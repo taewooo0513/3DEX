@@ -1,109 +1,24 @@
-//--------------------------------------------------------------------------------------
-// File: MeshLoader.h
-//
-// Wrapper class for ID3DXMesh interface. Handles loading mesh data from an .obj file
-// and resource management for material textures.
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
-#ifndef _MESHLOADER_H_
-#define _MESHLOADER_H_
 #pragma once
+#include "singleton.h"
 
-// Vertex format
-struct VERTEX
+class cMeshLoader : public singleton<cMeshLoader>
 {
-    D3DXVECTOR3 position;
-    D3DXVECTOR3 normal;
-    D3DXVECTOR2 texcoord;
-};
-
-
-// Used for a hashtable vertex cache when creating the mesh from a .obj file
-struct CacheEntry
-{
-    UINT index;
-    CacheEntry* pNext;
-};
-
-
-// Material properties per mesh subset
-struct Material
-{
-    WCHAR   strName[MAX_PATH];
-
-    D3DXVECTOR3 vAmbient;
-    D3DXVECTOR3 vDiffuse;
-    D3DXVECTOR3 vSpecular;
-    D3DMATERIAL9 material;
-
-    int nShininess;
-    float fAlpha;
-
-    bool bSpecular;
-
-    WCHAR   strTexture[MAX_PATH];
-    IDirect3DTexture9* pTexture;
-    D3DXHANDLE hTechnique;
-    Material()
-    {
-        material.Ambient = D3DXCOLOR(1.f, 1.f, 1.f, 0.f);
-        material.Diffuse = D3DXCOLOR(1.f, 1.f, 1.f, 0.f);
-        material.Specular = D3DXCOLOR(1.f, 1.f, 1.f, 0.f);
-        material.Emissive = D3DXCOLOR(1.f, 1.f, 1.f, 0.f);
-        material.Power = 0.f;
-    }
-};
-
-
-class CMeshLoader
-{
-public:
-            CMeshLoader();
-            ~CMeshLoader();
-
-    HRESULT Create( IDirect3DDevice9* pd3dDevice, const wstring& strFilename );
-    void    Destroy();
-
-
-    UINT    GetNumMaterials() const
-    {
-        return m_Materials.GetSize();
-    }
-    Material* GetMaterial( UINT iMaterial )
-    {
-        return m_Materials.GetAt( iMaterial );
-    }
-
-    ID3DXMesh* GetMesh()
-    {
-        return m_pMesh;
-    }
-    WCHAR* GetMediaDirectory()
-    {
-        return m_strMediaDir;
-    }
-
 private:
+	string objPath;
+	vector<D3DXVECTOR3> Pos;
+	vector<D3DXVECTOR2> TexCoord;
+	vector<D3DXVECTOR3> Normal;
+	vector<VERTEX> Ver;
+	vector<DWORD> Index;
+	vector<DWORD> Attribute;
+	vector <CacheEntry*> VertexCache;
+	string mtlPath;
+public:
+	cMeshLoader();
+	~cMeshLoader();
 
-    HRESULT LoadGeometryFromOBJ(const wstring& strFilename );
-    HRESULT LoadMaterialsFromMTL(const wstring& strFileName );
-    void    InitMaterial( Material* pMaterial );
-
-    DWORD   AddVertex( UINT hash, VERTEX* pVertex );
-    void    DeleteCache();
-
-    IDirect3DDevice9* m_pd3dDevice;    // Direct3D Device object associated with this mesh
-    ID3DXMesh* m_pMesh;         // Encapsulated D3DX Mesh
-
-    CGrowableArray <CacheEntry*> m_VertexCache;   // Hashtable cache for locating duplicate vertices
-    CGrowableArray <VERTEX> m_Vertices;      // Filled and copied to the vertex buffer
-    CGrowableArray <DWORD> m_Indices;       // Filled and copied to the index buffer
-    CGrowableArray <DWORD> m_Attributes;    // Filled and copied to the attribute buffer
-    CGrowableArray <Material*> m_Materials;     // Holds material properties per subset
-
-    WCHAR   m_strMediaDir[ MAX_PATH ];               // Directory where the mesh was found
+	void Create(LPD3DXMESH* mesh);
+	void MeshLoad(const string& key, Mesh* mesh, const string& mapPath = "None");
+	DWORD AddVerTex(UINT hash, VERTEX* pVerTex);
+	void ObjLoad(Mesh* mesh, const string& objpath, const string& mapPath = "None");
 };
-
-#endif // _MESHLOADER_H_
-

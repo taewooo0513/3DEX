@@ -3,10 +3,34 @@
 
 LoadManager::LoadManager()
 {
+	Loader = new cMeshLoader;
+
 }
 
 LoadManager::~LoadManager()
 {
+	for (auto iter : m_Texture)
+	{
+		iter.second->texturePtr->Release();
+		SAFE_DELETE(iter.second);
+	}
+	m_Texture.clear();
+	for (auto iter : m_Mesh)
+	{
+		SAFE_DELETE(iter.second);
+	}
+	m_Mesh.clear();
+	for (auto iter : m_MultiMesh)
+	{
+		SAFE_DELETE(iter.second);
+	}
+	m_MultiMesh.clear();
+	for (auto iter : m_MultiTexture)
+	{
+		SAFE_DELETE(iter.second);
+	}
+	m_MultiTexture.clear();
+	SAFE_DELETE(Loader);
 }
 
 Texture* LoadManager::AddImage(const string& key, const string& path)
@@ -15,8 +39,8 @@ Texture* LoadManager::AddImage(const string& key, const string& path)
 	if (find == m_Texture.end())
 	{
 		D3DXIMAGE_INFO info;
-		LPDIRECT3DTEXTURE9 texturePtr;
-		if (D3DXCreateTextureFromFileExA(Device, path.c_str(), -2, -2, 0, 0, D3DFMT_UNKNOWN, D3DPOOL_DEFAULT, -1, -1, 0, &info, nullptr, &texturePtr) == S_OK)
+		IDirect3DTexture9* texturePtr;
+		if (D3DXCreateTextureFromFileExA(Device, path.c_str(), D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2, 0, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, &info, nullptr, &texturePtr) == S_OK)
 		{
 			Texture* text = new Texture(texturePtr, info);
 			m_Texture[key] = text;
@@ -38,16 +62,13 @@ MultiTexture* LoadManager::AddImages(const string& key, const string& Folder, in
 		for (int i = 0; i > count; i++)
 		{
 			char a;
-			sprintf(&a,"./Resouce/image/",Folder,"/",count,".png");
+			sprintf(&a, "./Resouce/image/", Folder, "/", count, ".png");
 			if (D3DXCreateTextureFromFileExA(Device, to_string(a).c_str(), -2, -2, 0, 0, D3DFMT_UNKNOWN, D3DPOOL_DEFAULT, -1, -1, 0, &info, nullptr, &texturePtr) == S_OK)
 			{
 				Texture* text = new Texture(texturePtr, info);
 				MultiTexture* Multi = new MultiTexture(text);
 				m_MultiTexture[key] = Multi;
-				if (i == count)
-				{
-					return Multi;
-				}
+
 			}
 		}
 		return nullptr;
@@ -76,29 +97,61 @@ MultiTexture* LoadManager::FindImages(const string& key, int count)
 }
 
 
-Mesh* LoadManager::AddMesh(const string& key, const wstring& strFilename)
+Mesh* LoadManager::AddMesh(const string& key, string strFilename)
 {
 	auto find = m_Mesh.find(key);
 	if (find != m_Mesh.end())
 	{
 		return find->second;
 	}
-	CMeshLoader* pMeshLoader = new CMeshLoader();
-	pMeshLoader->Create(Device, strFilename);
-	if (pMeshLoader->GetMesh() == nullptr)
+
+	Mesh* mesh = new Mesh;
+	Loader->ObjLoad(mesh, strFilename);
+	m_Mesh[key] = mesh;
+	return m_Mesh[key];
+}
+
+MultiMesh* LoadManager::AddMeshs(const string& key, string strFilename, int count)
+{
+	auto find = m_MultiMesh.find(key);
+	if (find != m_MultiMesh.end())
 	{
-		SAFE_DELETE(pMeshLoader);
-		return nullptr;
+		return find->second;
 	}
-	Mesh* mesh = new Mesh();
-	mesh->pMesh = pMeshLoader->GetMesh();
-	for (int i = 0; i < pMeshLoader->GetNumMaterials(); i++)
+
+	MultiMesh* meshs = new MultiMesh;
+	for (int i = 1; i <= count; i++)
 	{
-		mesh->v_Matrial.push_back(pMeshLoader->GetMaterial(i));
+	Mesh* mesh = new Mesh;
+		string path = strFilename;
+		if (i < 10)
+		{
+			path.push_back('0');
+			path.push_back(to_string(i).at(0));
+		}
+		else
+		{
+			path.push_back(to_string(i).at(0));
+			path.push_back(to_string(i).at(1));
+		}
+
+			path.push_back('.');
+			path.push_back('o');
+			path.push_back('b');
+			path.push_back('j');
+
+
+		cout << path ;
+
+		Loader->ObjLoad(mesh, path);
+		
+
+		meshs->v_mesh.push_back(mesh);
 	}
-	m_Mesh[key.c_str()] = mesh;
-	SAFE_DELETE(pMeshLoader);
-	return mesh;
+		m_MultiMesh.insert(make_pair(key, meshs));
+
+
+	return m_MultiMesh[key];
 }
 
 Mesh* LoadManager::FindMesh(const string& key)
@@ -106,8 +159,18 @@ Mesh* LoadManager::FindMesh(const string& key)
 	auto find = m_Mesh.find(key);
 	if (find == m_Mesh.end())
 	{
-	return nullptr;
+		return nullptr;
 	}
-		return find->second;
+	return find->second;
+}
+
+MultiMesh * LoadManager::FindMeshs(const string& key)
+{
+	auto find = m_MultiMesh.find(key);
+	if (find == m_MultiMesh.end())
+	{
+		return nullptr;
+	}
+	return find->second;
 }
 

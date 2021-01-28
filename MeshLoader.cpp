@@ -1,576 +1,451 @@
-//--------------------------------------------------------------------------------------
-// File: MeshLoader.cpp
-//
-// Wrapper class for ID3DXMesh interface. Handles loading mesh data from an .obj file
-// and resource management for material textures.
-//
-// Copyright (c) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
 #include "DXUT.h"
-#include "SDKmisc.h"
-#pragma warning(disable: 4995)
-#include "meshloader.h"
-#include <fstream>
-using namespace std;
-#pragma warning(default: 4995)
-
-
-// Vertex declaration
-D3DVERTEXELEMENT9 VERTEX_DECL[] =
+#include "MeshLoader.h"
+#include <iosfwd>
+cMeshLoader::cMeshLoader()
 {
-    { 0,  0, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT,  D3DDECLUSAGE_POSITION, 0},
-    { 0, 12, D3DDECLTYPE_FLOAT3, D3DDECLMETHOD_DEFAULT,  D3DDECLUSAGE_NORMAL,   0},
-    { 0, 24, D3DDECLTYPE_FLOAT2, D3DDECLMETHOD_DEFAULT,  D3DDECLUSAGE_TEXCOORD, 0},
-    D3DDECL_END()
-};
+}
 
-
-//--------------------------------------------------------------------------------------
-CMeshLoader::CMeshLoader()
+cMeshLoader::~cMeshLoader()
 {
-    m_pd3dDevice = NULL;
-    m_pMesh = NULL;
 
-    ZeroMemory( m_strMediaDir, sizeof( m_strMediaDir ) );
+	Pos.clear();
+	TexCoord.clear();
+	Normal.clear();
+	Ver.clear();
+	Index.clear();
+	Attribute.clear();
+	VertexCache.clear();
+
 }
 
 
-//--------------------------------------------------------------------------------------
-CMeshLoader::~CMeshLoader()
+void cMeshLoader::Create(LPD3DXMESH* mesh)
 {
-    Destroy();
+	if (FAILED(D3DXCreateMeshFVF(Index.size() / 3, Ver.size(), D3DXMESH_MANAGED | D3DXMESH_32BIT, VERTEXFVF, Device, mesh)))
+	{
+		return;
+	}
+
+	VERTEX* vertices = nullptr;
+	if (FAILED((*mesh)->LockVertexBuffer(0, (void**)&vertices)))
+	{
+		return;
+	}
+	memcpy(vertices, &Ver[0], sizeof(VERTEX) * Ver.size());
+	(*mesh)->UnlockVertexBuffer();
+	Ver.clear();
+
+	DWORD* indices = nullptr;
+	if (FAILED((*mesh)->LockIndexBuffer(0, (void**)&indices)))
+	{
+		return;
+	}
+	memcpy(indices, &Index[0], sizeof(DWORD) * Index.size());
+	(*mesh)->UnlockIndexBuffer();
+	Index.clear();
+
+	DWORD* attribute = nullptr;
+	if (FAILED((*mesh)->LockAttributeBuffer(0, &attribute)))
+	{
+		return;
+
+	}
+	memcpy(attribute, &Attribute[0], sizeof(DWORD) * Attribute.size());
+	(*mesh)->UnlockAttributeBuffer();
+	Attribute.clear();
+	for (size_t i = 0; i < VertexCache.size(); ++i)
+	{
+		CacheEntry* pEntry = VertexCache[i];
+		while (pEntry != NULL)
+		{
+			CacheEntry* pNext = pEntry->pNext;
+			SAFE_DELETE(pEntry);
+			pEntry = pNext;
+		}
+	}
+	VertexCache.clear();
+	TexCoord.clear();
+	Pos.clear();
+	Normal.clear();
 }
 
-
-//--------------------------------------------------------------------------------------
-void CMeshLoader::Destroy()
+void cMeshLoader::MeshLoad(const string& key, Mesh* mesh, const string& mapPath)
 {
-    for( int iMaterial = 0; iMaterial < m_Materials.GetSize(); iMaterial++ )
-    {
-        Material* pMaterial = m_Materials.GetAt( iMaterial );
 
-        // Avoid releasing the same texture twice
-        for( int x = iMaterial + 1; x < m_Materials.GetSize(); x++ )
-        {
-            Material* pCur = m_Materials.GetAt( x );
-            if( pCur->pTexture == pMaterial->pTexture )
-                pCur->pTexture = NULL;
-        }
+	ifstream mtlLoader;
+	mtlLoader.open(mtlPath);
 
-        SAFE_RELEASE( pMaterial->pTexture );
-        SAFE_DELETE( pMaterial );
-    }
+	if (mtlLoader.fail())
+	{
+		return;
+	}
+	Material* lpMtl = nullptr;
+	D3DMATERIAL9* d3dMtl = nullptr;
+	bool findMtl = false;
+	while (!mtlLoader.eof())
+	{
+		string tag;
+		mtlLoader >> tag;
+		
+		if (!findMtl)
+		{
 
-    m_Materials.RemoveAll();
-    m_Vertices.RemoveAll();
-    m_Indices.RemoveAll();
-    m_Attributes.RemoveAll();
+			if (tag == "newmtl")
+			{
+				mtlLoader >> tag;
+				if (tag == key)
+				{
+					lpMtl = new Material;
+					lpMtl->mtlName = key;
+					mesh->vMaterial.push_back(lpMtl);
+					d3dMtl = &lpMtl->material;
+					findMtl = true;
 
-    SAFE_RELEASE( m_pMesh );
-    m_pd3dDevice = NULL;
+				}
+
+			}
+
+		}
+		else
+		{
+			if (tag == "Ka")
+			{
+				float r, g, b;
+				r = g = b = 0.f;
+				mtlLoader >> tag;
+				r = (float)atof(tag.c_str());
+				mtlLoader >> tag;
+				g = (float)atof(tag.c_str());
+				mtlLoader >> tag;
+				b = (float)atof(tag.c_str());
+				d3dMtl->Ambient = { r,g,b,1.f };
+			}
+			if (tag == "Kd")
+			{
+				float r, g, b;
+				r = g = b = 0.f;
+				mtlLoader >> tag;
+				r = (float)atof(tag.c_str());
+				mtlLoader >> tag;
+				g = (float)atof(tag.c_str());
+				mtlLoader >> tag;
+				b = (float)atof(tag.c_str());
+				d3dMtl->Diffuse = { r,g,b,1.f };
+			}
+			if (tag == "Ks")
+			{
+				float r, g, b;
+				r = g = b = 0.f;
+
+				mtlLoader >> tag;
+				r = (float)atof(tag.c_str());
+
+				mtlLoader >> tag;
+				g = (float)atof(tag.c_str());
+
+				mtlLoader >> tag;
+				b = (float)atof(tag.c_str());
+
+				d3dMtl->Specular = { r, g, b, 1.f };
+			}
+			if (tag == "Ke")
+			{
+				float r, g, b;
+				r = g = b = 0.f;
+
+				mtlLoader >> tag;
+				r = (float)atof(tag.c_str());
+				mtlLoader >> tag;
+				g = (float)atof(tag.c_str());
+				mtlLoader >> tag;
+				b = (float)atof(tag.c_str());
+
+				d3dMtl->Emissive = { r,g,b, 1.f };
+			}
+			if (tag == "illum")
+			{
+				float l;
+
+				mtlLoader >> tag;
+				l = (float)atof(tag.c_str());
+
+				lpMtl->fIllum = l;
+			}
+
+			if (tag == "Ns")
+			{
+				float n;
+
+				mtlLoader >> tag;
+				n = (float)atof(tag.c_str());
+
+				lpMtl->fNs = n;
+			}
+
+			if (tag == "Tr" || tag == "d")
+			{
+				float a;
+
+				mtlLoader >> tag;
+
+				if (tag == "Tr")
+					a = 1.f - (float)atof(tag.c_str());
+				else
+					a = (float)atof(tag.c_str());
+
+				lpMtl->fAlpha = a;
+			}
+
+			if (tag == "map_Kd")
+			{
+				mtlLoader >> tag;
+
+				std::string ImagePath;
+
+				if (mapPath == "None")
+				{
+					int pathIndex = objPath.rfind("/"); // 마지막으로 사용된 해당 문자의 인덱스를 가져옴
+					ImagePath = objPath.substr(0, pathIndex + 1) + tag; // 첫번쨰 인자부터 두번째 인자의 수만큼 글자를 가져옴
+				}
+				else
+					ImagePath = mapPath + tag;
+
+				lpMtl->DiffuseMap = LOADER->AddImage(ImagePath, ImagePath);
+			}
+			if (tag == "map_Ks")
+			{
+				mtlLoader >> tag;
+
+				std::string ImagePath;
+
+				if (mapPath == "None")
+				{
+					int pathIndex = objPath.rfind("/"); // 마지막으로 사용된 해당 문자의 인덱스를 가져옴
+					ImagePath = objPath.substr(0, pathIndex + 1) + tag; // 첫번쨰 인자부터 두번째 인자의 수만큼 글자를 가져옴
+				}
+				else
+					ImagePath = mapPath + tag;
+
+				lpMtl->specularMap = LOADER->AddImage(ImagePath, ImagePath);
+			}
+
+
+			if (tag == "newmtl")
+				break;
+		}
+	}
+	mtlLoader.close();
+
+
+
 }
 
-
-//--------------------------------------------------------------------------------------
-HRESULT CMeshLoader::Create( IDirect3DDevice9* pd3dDevice, const wstring& strFilename )
+DWORD cMeshLoader::AddVerTex(UINT hash, VERTEX* pVerTex)
 {
-    HRESULT hr;
-    WCHAR str[ MAX_PATH ] = {0};
+	bool bFoundInList = false;
+	DWORD index = 0;
 
-    // Start clean
-    Destroy();
+	// Since it's very slow to check every element in the vertex list, a hashtable stores
+	// vertex indices according to the vertex position's index as reported by the OBJ file
+	if ((UINT)VertexCache.size() > hash)
+	{
+		CacheEntry* pEntry = VertexCache[hash];
+		while (pEntry != NULL)
+		{
+			VERTEX* pCacheVertex = &Ver[pEntry->index];
 
-    // Store the device pointer
-    m_pd3dDevice = pd3dDevice;
+			// If this vertex is identical to the vertex already in the list, simply
+			// point the index buffer to the existing vertex
+			if (0 == memcmp(pVerTex, pCacheVertex, sizeof(VERTEX)))
+			{
+				bFoundInList = true;
+				index = pEntry->index;
+				break;
+			}
 
-    // Load the vertex buffer, index buffer, and subset information from a file. In this case, 
-    // an .obj file was chosen for simplicity, but it's meant to illustrate that ID3DXMesh objects
-    // can be filled from any mesh file format once the necessary data is extracted from file.
-    V_RETURN( LoadGeometryFromOBJ( strFilename ) );
+			pEntry = pEntry->pNext;
+		}
+	}
 
-    // Set the current directory based on where the mesh was found
-    WCHAR wstrOldDir[MAX_PATH] = {0};
-    GetCurrentDirectory( MAX_PATH, wstrOldDir );
-    SetCurrentDirectory( m_strMediaDir );
+	// Vertex was not found in the list. Create a new entry, both within the Vertices list
+	// and also within the hashtable cache
+	if (!bFoundInList)
+	{
+		// Add to the Vertices list
+		index = Ver.size();
+		Ver.push_back(*pVerTex);
 
-    // Load material textures
-    for( int iMaterial = 0; iMaterial < m_Materials.GetSize(); iMaterial++ )
-    {
-        Material* pMaterial = m_Materials.GetAt( iMaterial );
-        if( pMaterial->strTexture[0] )
-        {
-            // Avoid loading the same texture twice
-            bool bFound = false;
-            for( int x = 0; x < iMaterial; x++ )
-            {
-                Material* pCur = m_Materials.GetAt( x );
-                if( 0 == wcscmp( pCur->strTexture, pMaterial->strTexture ) )
-                {
-                    bFound = true;
-                    pMaterial->pTexture = pCur->pTexture;
-                    break;
-                }
-            }
+		// Add this to the hashtable
+		CacheEntry* pNewEntry = new CacheEntry;
+		if (pNewEntry == NULL)
+			return (DWORD)-1;
 
-            // Not found, load the texture
-            if( !bFound )
-            {
-                V_RETURN( DXUTFindDXSDKMediaFileCch( str, MAX_PATH, pMaterial->strTexture ) );
-                V_RETURN( D3DXCreateTextureFromFile( pd3dDevice, pMaterial->strTexture,
-                                                     &( pMaterial->pTexture ) ) );
-            }
-        }
-    }
+		pNewEntry->index = index;
+		pNewEntry->pNext = NULL;
 
-    // Restore the original current directory
-    SetCurrentDirectory( wstrOldDir );
+		// Grow the cache if needed
+		while ((UINT)VertexCache.size() <= hash)
+		{
+			VertexCache.push_back(NULL);
+		}
 
-    // Create the encapsulated mesh
-    ID3DXMesh* pMesh = NULL;
-    V_RETURN( D3DXCreateMesh( m_Indices.GetSize() / 3, m_Vertices.GetSize(),
-                              D3DXMESH_MANAGED | D3DXMESH_32BIT, VERTEX_DECL,
-                              pd3dDevice, &pMesh ) );
+		// Add to the end of the linked list
+		CacheEntry* pCurEntry = VertexCache[hash];
+		if (pCurEntry == NULL)
+		{
+			// This is the head element
+			//m_VertexCache.SetAt(hash, pNewEntry);
+			VertexCache[hash] = pNewEntry;
+		}
+		else
+		{
+			// Find the tail
+			while (pCurEntry->pNext != NULL)
+			{
+				pCurEntry = pCurEntry->pNext;
+			}
 
-    // Copy the vertex data
-    VERTEX* pVertex;
-    V_RETURN( pMesh->LockVertexBuffer( 0, ( void** )&pVertex ) );
-    memcpy( pVertex, m_Vertices.GetData(), m_Vertices.GetSize() * sizeof( VERTEX ) );
-    pMesh->UnlockVertexBuffer();
-    m_Vertices.RemoveAll();
+			pCurEntry->pNext = pNewEntry;
 
-    // Copy the index data
-    DWORD* pIndex;
-    V_RETURN( pMesh->LockIndexBuffer( 0, ( void** )&pIndex ) );
-    memcpy( pIndex, m_Indices.GetData(), m_Indices.GetSize() * sizeof( DWORD ) );
-    pMesh->UnlockIndexBuffer();
-    m_Indices.RemoveAll();
 
-    // Copy the attribute data
-    DWORD* pSubset;
-    V_RETURN( pMesh->LockAttributeBuffer( 0, &pSubset ) );
-    memcpy( pSubset, m_Attributes.GetData(), m_Attributes.GetSize() * sizeof( DWORD ) );
-    pMesh->UnlockAttributeBuffer();
-    m_Attributes.RemoveAll();
+		}
+		if (pNewEntry == nullptr)
+		{
+			SAFE_DELETE(pNewEntry);
+		}
+	}
 
-    // Reorder the vertices according to subset and optimize the mesh for this graphics 
-    // card's vertex cache. When rendering the mesh's triangle list the vertices will 
-    // cache hit more often so it won't have to re-execute the vertex shader.
-    DWORD* aAdjacency = new DWORD[pMesh->GetNumFaces() * 3];
-    if( aAdjacency == NULL )
-        return E_OUTOFMEMORY;
-
-    V( pMesh->GenerateAdjacency( 1e-6f, aAdjacency ) );
-    V( pMesh->OptimizeInplace( D3DXMESHOPT_ATTRSORT | D3DXMESHOPT_VERTEXCACHE, aAdjacency, NULL, NULL, NULL ) );
-
-    SAFE_DELETE_ARRAY( aAdjacency );
-    m_pMesh = pMesh;
-
-    return S_OK;
+	return index;
 }
 
-
-//--------------------------------------------------------------------------------------
-HRESULT CMeshLoader::LoadGeometryFromOBJ( const wstring& strFileName )
+void cMeshLoader::ObjLoad(Mesh* mesh, const string& objpath, const string& mapPath)
 {
-    WCHAR strMaterialFilename[MAX_PATH] = {0};
-    WCHAR wstr[MAX_PATH];
-    char str[MAX_PATH];
-    HRESULT hr;
+	objPath = objpath;
 
-    // Find the file
-    V_RETURN( DXUTFindDXSDKMediaFileCch( wstr, MAX_PATH, strFileName.c_str() ) );
-    WideCharToMultiByte( CP_ACP, 0, wstr, -1, str, MAX_PATH, NULL, NULL );
+	DWORD dwAttribute = 0;
 
-    // Store the directory where the mesh was found
-    wcscpy_s( m_strMediaDir, MAX_PATH - 1, wstr );
-    WCHAR* pch = wcsrchr( m_strMediaDir, L'\\' );
-    if( pch )
-        *pch = NULL;
+	ifstream loader;
 
-    // Create temporary storage for the input data. Once the data has been loaded into
-    // a reasonable format we can create a D3DXMesh object and load it with the mesh data.
-    CGrowableArray <D3DXVECTOR3> Positions;
-    CGrowableArray <D3DXVECTOR2> TexCoords;
-    CGrowableArray <D3DXVECTOR3> Normals;
+	loader.open(objpath.c_str());
 
-    // The first subset uses the default material
-    Material* pMaterial = new Material();
-    if( pMaterial == NULL )
-        return E_OUTOFMEMORY;
+	if (loader.fail())
+	{
 
-    InitMaterial( pMaterial );
-    wcscpy_s( pMaterial->strName, MAX_PATH - 1, L"default" );
-    m_Materials.Add( pMaterial );
+		return;
+	}
 
-    DWORD dwCurSubset = 0;
+	while (!loader.eof())
+	{
+		std::string tag;
+		loader >> tag;
 
-    // File input
-    WCHAR strCommand[256] = {0};
-    wifstream InFile( str );
-    if( !InFile )
-        return DXTRACE_ERR( L"wifstream::open", E_FAIL );
+		if (tag == "v")
+		{
+			Vec3 position;
+			loader >> position.x >> position.y >> position.z;
+			
+			if (mesh->minVec.x > position.x)
+			{
+				mesh->minVec.x = position.x;
+			}
+			if (mesh->minVec.y > position.y)
+			{
+				mesh->minVec.y = position.y;
+			}
+			if (mesh->minVec.z > position.z)
+			{
+				mesh->minVec.z = position.z;
+			}
+			if (mesh->maxVec.x < position.x)
+			{
+				mesh->maxVec.x = position.x;
+			}
+			if (mesh->maxVec.y < position.y)
+			{
+				mesh->maxVec.y = position.y;
+			}
+			if (mesh->maxVec.z < position.z)
+			{
+				mesh->maxVec.z = position.z;
+			}
+			
+			Pos.push_back(position);
+			continue;
+		}
+		else if (tag == "vt")
+		{
+			Vec2 texCoord;
+			loader >> texCoord.x >> texCoord.y;
+			TexCoord.push_back(Vec2(texCoord.x, 1.f - texCoord.y));
+			continue;
+		}
+		else if (tag == "vn")
+		{
+			Vec3 normal;
+			loader >> normal.x >> normal.y >> normal.z;
+			Normal.push_back(normal);
+			continue;
+		}
+		else if (tag == "f")
+		{
+			for (int i = 0; i < 3; ++i)
+			{
+				std::string str;
+				loader >> str;
 
-    for(; ; )
-    {
-        InFile >> strCommand;
-        if( !InFile )
-            break;
+				UINT iPosition;
+				UINT iTexCoord;
+				UINT iNormal;
 
-        if( 0 == wcscmp( strCommand, L"#" ) )
-        {
-            // Comment
-        }
-        else if( 0 == wcscmp( strCommand, L"v" ) )
-        {
-            // Vertex Position
-            float x, y, z;
-            InFile >> x >> y >> z;
-            Positions.Add( D3DXVECTOR3( x, y, z ) );
-        }
-        else if( 0 == wcscmp( strCommand, L"vt" ) )
-        {
-            // Vertex TexCoord
-            float u, v;
-            InFile >> u >> v;
-            TexCoords.Add( D3DXVECTOR2( u, v ) );
-        }
-        else if( 0 == wcscmp( strCommand, L"vn" ) )
-        {
-            // Vertex Normal
-            float x, y, z;
-            InFile >> x >> y >> z;
-            Normals.Add( D3DXVECTOR3( x, y, z ) );
-        }
-        else if( 0 == wcscmp( strCommand, L"f" ) )
-        {
-            // Face
-            UINT iPosition, iTexCoord, iNormal;
-            VERTEX vertex;
+				sscanf(str.c_str(), "%u/%u/%u", &iPosition, &iTexCoord, &iNormal);
 
-            for( UINT iFace = 0; iFace < 3; iFace++ )
-            {
-                ZeroMemory( &vertex, sizeof( VERTEX ) );
+				VERTEX* vertex = new VERTEX(
+					Pos[iPosition - 1],
+					TexCoord[iTexCoord - 1]
+					, Normal[iNormal - 1]
+				);
+				
+				DWORD index = AddVerTex(iPosition, vertex);
+				Index.push_back(index);
+				SAFE_DELETE(vertex);
+			}
 
-                // OBJ format uses 1-based arrays
-                InFile >> iPosition;
-                vertex.position = Positions[ iPosition - 1 ];
+			Attribute.push_back(dwAttribute);
+			continue;
+		}
+		else if (tag == "mtllib")
+		{
+			loader >> mtlPath;
 
-                if( '/' == InFile.peek() )
-                {
-                    InFile.ignore();
+			int pathIndex = objPath.rfind("/"); // 마지막으로 사용된 해당 문자의 인덱스를 가져옴
 
-                    if( '/' != InFile.peek() )
-                    {
-                        // Optional texture coordinate
-                        InFile >> iTexCoord;
-                        vertex.texcoord = TexCoords[ iTexCoord - 1 ];
-                    }
+			mtlPath = objPath.substr(0, pathIndex + 1) + mtlPath; // 첫번쨰 인자부터 두번째 인자의 수만큼 글자를 가져옴
+		}
+		else if (tag == "usemtl")
+		{
+			loader >> tag;
 
-                    if( '/' == InFile.peek() )
-                    {
-                        InFile.ignore();
+			bool bFind = false;
 
-                        // Optional vertex normal
-                        InFile >> iNormal;
-                        vertex.normal = Normals[ iNormal - 1 ];
-                    }
-                }
+			for (size_t iMtl = 0; iMtl < mesh->vMaterial.size(); ++iMtl)
+			{
+				if (mesh->vMaterial[iMtl]->mtlName == tag)
+				{
+					dwAttribute = iMtl;
+					bFind = true;
+				}
+			}
 
-                // If a duplicate vertex doesn't exist, add this vertex to the Vertices
-                // list. Store the index in the Indices array. The Vertices and Indices
-                // lists will eventually become the Vertex Buffer and Index Buffer for
-                // the mesh.
-                DWORD index = AddVertex( iPosition, &vertex );
-                if ( index == (DWORD)-1 )
-                    return E_OUTOFMEMORY;
+			if (!bFind)
+			{
+				dwAttribute = mesh->vMaterial.size();
+				MeshLoad(tag, mesh, mapPath);
+			}
 
-                m_Indices.Add( index );
-            }
-            m_Attributes.Add( dwCurSubset );
-        }
-        else if( 0 == wcscmp( strCommand, L"mtllib" ) )
-        {
-            // Material library
-            InFile >> strMaterialFilename;
-        }
-        else if( 0 == wcscmp( strCommand, L"usemtl" ) )
-        {
-            // Material
-            WCHAR strName[MAX_PATH] = {0};
-            InFile >> strName;
+			continue;
+		}
+	}
 
-            bool bFound = false;
-            for( int iMaterial = 0; iMaterial < m_Materials.GetSize(); iMaterial++ )
-            {
-                Material* pCurMaterial = m_Materials.GetAt( iMaterial );
-                if( 0 == wcscmp( pCurMaterial->strName, strName ) )
-                {
-                    bFound = true;
-                    dwCurSubset = iMaterial;
-                    break;
-                }
-            }
+	return Create(&mesh->lpD3DXMesh);
 
-            if( !bFound )
-            {
-                pMaterial = new Material();
-                if( pMaterial == NULL )
-                    return E_OUTOFMEMORY;
-
-                dwCurSubset = m_Materials.GetSize();
-
-                InitMaterial( pMaterial );
-                wcscpy_s( pMaterial->strName, MAX_PATH - 1, strName );
-
-                m_Materials.Add( pMaterial );
-            }
-        }
-        else
-        {
-            // Unimplemented or unrecognized command
-        }
-
-        InFile.ignore( 1000, '\n' );
-    }
-
-    // Cleanup
-    InFile.close();
-    DeleteCache();
-
-    // If an associated material file was found, read that in as well.
-    if( strMaterialFilename[0] )
-    {
-        V_RETURN( LoadMaterialsFromMTL( strMaterialFilename ) );
-    }
-
-    return S_OK;
-}
-
-
-//--------------------------------------------------------------------------------------
-DWORD CMeshLoader::AddVertex( UINT hash, VERTEX* pVertex )
-{
-    // If this vertex doesn't already exist in the Vertices list, create a new entry.
-    // Add the index of the vertex to the Indices list.
-    bool bFoundInList = false;
-    DWORD index = 0;
-
-    // Since it's very slow to check every element in the vertex list, a hashtable stores
-    // vertex indices according to the vertex position's index as reported by the OBJ file
-    if( ( UINT )m_VertexCache.GetSize() > hash )
-    {
-        CacheEntry* pEntry = m_VertexCache.GetAt( hash );
-        while( pEntry != NULL )
-        {
-            VERTEX* pCacheVertex = m_Vertices.GetData() + pEntry->index;
-
-            // If this vertex is identical to the vertex already in the list, simply
-            // point the index buffer to the existing vertex
-            if( 0 == memcmp( pVertex, pCacheVertex, sizeof( VERTEX ) ) )
-            {
-                bFoundInList = true;
-                index = pEntry->index;
-                break;
-            }
-
-            pEntry = pEntry->pNext;
-        }
-    }
-
-    // Vertex was not found in the list. Create a new entry, both within the Vertices list
-    // and also within the hashtable cache
-    if( !bFoundInList )
-    {
-        // Add to the Vertices list
-        index = m_Vertices.GetSize();
-        m_Vertices.Add( *pVertex );
-
-        // Add this to the hashtable
-        CacheEntry* pNewEntry = new CacheEntry;
-        if( pNewEntry == NULL )
-            return (DWORD)-1;
-
-        pNewEntry->index = index;
-        pNewEntry->pNext = NULL;
-
-        // Grow the cache if needed
-        while( ( UINT )m_VertexCache.GetSize() <= hash )
-        {
-            m_VertexCache.Add( NULL );
-        }
-
-        // Add to the end of the linked list
-        CacheEntry* pCurEntry = m_VertexCache.GetAt( hash );
-        if( pCurEntry == NULL )
-        {
-            // This is the head element
-            m_VertexCache.SetAt( hash, pNewEntry );
-        }
-        else
-        {
-            // Find the tail
-            while( pCurEntry->pNext != NULL )
-            {
-                pCurEntry = pCurEntry->pNext;
-            }
-
-            pCurEntry->pNext = pNewEntry;
-        }
-    }
-
-    return index;
-}
-
-
-//--------------------------------------------------------------------------------------
-void CMeshLoader::DeleteCache()
-{
-    // Iterate through all the elements in the cache and subsequent linked lists
-    for( int i = 0; i < m_VertexCache.GetSize(); i++ )
-    {
-        CacheEntry* pEntry = m_VertexCache.GetAt( i );
-        while( pEntry != NULL )
-        {
-            CacheEntry* pNext = pEntry->pNext;
-            SAFE_DELETE( pEntry );
-            pEntry = pNext;
-        }
-    }
-
-    m_VertexCache.RemoveAll();
-}
-
-
-//--------------------------------------------------------------------------------------
-HRESULT CMeshLoader::LoadMaterialsFromMTL(const wstring& strFileName )
-{
-    HRESULT hr;
-
-    // Set the current directory based on where the mesh was found
-    WCHAR wstrOldDir[MAX_PATH] = {0};
-    GetCurrentDirectory( MAX_PATH, wstrOldDir );
-    SetCurrentDirectory( m_strMediaDir );
-
-    // Find the file
-    WCHAR strPath[MAX_PATH];
-    char cstrPath[MAX_PATH];
-    V_RETURN( DXUTFindDXSDKMediaFileCch( strPath, MAX_PATH, strFileName.c_str() ) );
-    WideCharToMultiByte( CP_ACP, 0, strPath, -1, cstrPath, MAX_PATH, NULL, NULL );
-
-    // File input
-    WCHAR strCommand[256] = {0};
-    wifstream InFile( cstrPath );
-    if( !InFile )
-        return DXTRACE_ERR( L"wifstream::open", E_FAIL );
-
-    // Restore the original current directory
-    SetCurrentDirectory( wstrOldDir );
-
-    Material* pMaterial = NULL;
-
-    for(; ; )
-    {
-        InFile >> strCommand;
-        if( !InFile )
-            break;
-
-        if( 0 == wcscmp( strCommand, L"newmtl" ) )
-        {
-            // Switching active materials
-            WCHAR strName[MAX_PATH] = {0};
-            InFile >> strName;
-
-            pMaterial = NULL;
-            for( int i = 0; i < m_Materials.GetSize(); i++ )
-            {
-                Material* pCurMaterial = m_Materials.GetAt( i );
-                if( 0 == wcscmp( pCurMaterial->strName, strName ) )
-                {
-                    pMaterial = pCurMaterial;
-                    break;
-                }
-            }
-        }
-
-        // The rest of the commands rely on an active material
-        if( pMaterial == NULL )
-            continue;
-
-        if( 0 == wcscmp( strCommand, L"#" ) )
-        {
-            // Comment
-        }
-        else if( 0 == wcscmp( strCommand, L"Ka" ) )
-        {
-            // Ambient color
-            float r, g, b;
-            InFile >> r >> g >> b;
-            pMaterial->vAmbient = D3DXVECTOR3( r, g, b );
-        }
-        else if( 0 == wcscmp( strCommand, L"Kd" ) )
-        {
-            // Diffuse color
-            float r, g, b;
-            InFile >> r >> g >> b;
-            pMaterial->vDiffuse = D3DXVECTOR3( r, g, b );
-        }
-        else if( 0 == wcscmp( strCommand, L"Ks" ) )
-        {
-            // Specular color
-            float r, g, b;
-            InFile >> r >> g >> b;
-            pMaterial->vSpecular = D3DXVECTOR3( r, g, b );
-        }
-        else if( 0 == wcscmp( strCommand, L"d" ) ||
-                 0 == wcscmp( strCommand, L"Tr" ) )
-        {
-            // Alpha
-            InFile >> pMaterial->fAlpha;
-        }
-        else if( 0 == wcscmp( strCommand, L"Ns" ) )
-        {
-            // Shininess
-            int nShininess;
-            InFile >> nShininess;
-            pMaterial->nShininess = nShininess;
-        }
-        else if( 0 == wcscmp( strCommand, L"illum" ) )
-        {
-            // Specular on/off
-            int illumination;
-            InFile >> illumination;
-            pMaterial->bSpecular = ( illumination == 2 );
-        }
-        else if( 0 == wcscmp( strCommand, L"map_Kd" ) )
-        {
-            // Texture
-            InFile >> pMaterial->strTexture;
-        }
-
-        else
-        {
-            // Unimplemented or unrecognized command
-        }
-
-        InFile.ignore( 1000, L'\n' );
-    }
-
-    InFile.close();
-
-    return S_OK;
-}
-
-
-//--------------------------------------------------------------------------------------
-void CMeshLoader::InitMaterial( Material* pMaterial )
-{
-    ZeroMemory( pMaterial, sizeof( Material ) );
-
-    pMaterial->vAmbient = D3DXVECTOR3( 0.2f, 0.2f, 0.2f );
-    pMaterial->vDiffuse = D3DXVECTOR3( 0.8f, 0.8f, 0.8f );
-    pMaterial->vSpecular = D3DXVECTOR3( 1.0f, 1.0f, 1.0f );
-    pMaterial->nShininess = 0;
-    pMaterial->fAlpha = 1.0f;
-    pMaterial->bSpecular = false;
-    pMaterial->pTexture = NULL;
 }

@@ -229,6 +229,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;D3DXFX_LARGEADDRESS_HANDLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>DXUT.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions> %(AdditionalOptions)</AdditionalOptions>
@@ -385,16 +386,42 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BoundingBox.cpp" />
+    <ClCompile Include="CamManager.cpp" />
+    <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="DirtBlock.cpp" />
+    <ClCompile Include="EXObject.cpp" />
+    <ClCompile Include="GizmoManager.cpp" />
+    <ClCompile Include="ingameScene.cpp" />
     <ClCompile Include="LoadManager.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="MeshLoader.cpp" />
+    <ClCompile Include="NormalEnemy.cpp" />
+    <ClCompile Include="Object.cpp" />
+    <ClCompile Include="ObjectManager.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Render2DManager.cpp" />
     <ClCompile Include="Render3DManager.cpp" />
+    <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneManager.cpp" />
+    <ClInclude Include="BoundingBox.h" />
+    <ClInclude Include="CamManager.h" />
+    <ClInclude Include="Collision.h" />
+    <ClInclude Include="DirtBlock.h" />
+    <ClInclude Include="EXObject.h" />
+    <ClInclude Include="GizmoManager.h" />
+    <ClInclude Include="ingameScene.h" />
     <ClInclude Include="LoadManager.h" />
     <ClInclude Include="Main.h" />
     <ClInclude Include="MeshLoader.h" />
+    <ClInclude Include="NormalEnemy.h" />
+    <ClInclude Include="Object.h" />
+    <ClInclude Include="ObjectManager.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Render2DManager.h" />
     <ClInclude Include="Render3DManager.h" />
+    <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneManager.h" />
     <ClInclude Include="singleton.h" />
     <ClInclude Include="stdafx.h" />
     <None Include="DXUT\Optional\directx.ico" />
