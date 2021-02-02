@@ -147,6 +147,7 @@ struct CacheEntry
 
 struct Transform
 {
+	float PlusPower = 0;
 	CDXUTTimer* timer;
 	Mesh *GetMesh;
 	Vec3 Pos; Vec3 Rot; Vec3 Size;

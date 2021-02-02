@@ -17,11 +17,18 @@ void Main::Init()
 	//씬
 	SCENE->AddScene("ingame",new ingameScene);
 	//3D오브젝트
+	LOADER->AddMesh("Enemy","./Resource/Ditto/Enemy.obj");
+	LOADER->AddMesh("Cat","./Resource/ll/cat.obj");
 	LOADER->AddMesh("BackGround","./Resource/BG1.obj");
 	LOADER->AddMesh("BacksGround", "./Resource/Run/Run_000001.obj");
 	LOADER->AddMesh("Block","./Resource/DirtBlock.obj");
 	//3D 애니메이션
-	LOADER->AddMeshs("Player","./Resource/Run/Run_0000",34);
+	LOADER->AddMeshs("PlayerRun","./Resource/Run/(",21);
+	LOADER->AddMeshs("PlayerIdle", "./Resource/Idle/(", 57);
+	LOADER->AddMeshs("PlayerRightPunch", "./Resource/RightPunch/(", 30);
+	LOADER->AddMeshs("PlayerLeftPunch", "./Resource/LeftPunch/(", 39);
+	LOADER->AddMeshs("PlayerRoll", "./Resource/Roll/(", 35);
+	LOADER->AddMeshs("PlayerLeftUper", "./Resource/Uper/(", 40);
 
 	//2D 이미지
 	LOADER->AddImage("fdas","./media/cup.jpg");

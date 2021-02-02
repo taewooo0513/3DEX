@@ -105,13 +105,13 @@ void ObjectManager::Gravity(Object* obj)
 {
 	if (obj->CollNow == true)
 	{
-		GravityPower = 0;
+		obj->ts.PlusPower = 0;
 		obj->ts.GravityPower = 0;
 	}
 	else
 	{
-		GravityPower += 0.001;
-		obj->ts.GravityPower -= GravityPower;
+		obj->ts.PlusPower+= 0.001;
+		obj->ts.GravityPower -= obj->ts.PlusPower;
 	}
 	obj->CollNow = false;
 }

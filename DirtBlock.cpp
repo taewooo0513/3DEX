@@ -11,7 +11,7 @@ DirtBlock::DirtBlock(Vec3 pos)
 	mesh = LOADER->FindMesh("Block");
 	ts.SetPos(pos);
 	ts.SetRot(Vec3(0,0,0));
-	ts.SetScale(Vec3(10,10,10));
+	ts.SetScale(Vec3(5,5,5));
 	ts.SetWorldMatrix();
 	ts.GetMesh = mesh;
 

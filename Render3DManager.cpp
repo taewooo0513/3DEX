@@ -42,7 +42,7 @@ Render3DManager::Render3DManager()
 	DWORD* Attribute = nullptr;
 
 	Device->SetRenderState(D3DRS_LIGHTING, FALSE);
-	Device->SetRenderState(D3DRS_ALPHABLENDENABLE, FALSE);
+	Device->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
 	Device->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA);
 	Device->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_SRCALPHA);
 	Device->SetRenderState(D3DRS_CULLMODE, D3DCULL_NONE);

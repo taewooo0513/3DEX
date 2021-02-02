@@ -3,9 +3,10 @@
 class NormalEnemy :public Object
 {
 private :
-
+	Mesh * mesh;
+	Vec3 pos;
 public:
-	NormalEnemy();
+	NormalEnemy(Vec3 pos);
 	virtual ~NormalEnemy();
 	// Object을(를) 통해 상속됨
 	virtual void Update() override;

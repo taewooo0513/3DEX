@@ -1,25 +1,15 @@
-﻿  LoadManager.cpp
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(56,36): warning C4840: variadic 함수의 인수로서 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' 클래스를 이식 불가능하게 사용했습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(56,36): message : 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string'은(는) trivial이 아닙니다.
-D:\q비쥬얼\VC\Tools\MSVC\14.27.29110\include\xstring(2272,5): message : 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' 선언을 참조하십시오.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(56,36): message : 생성자와 소멸자가 호출되지 않습니다. 클래스의 비트 복사가 인수로 전달됩니다.
-D:\q비쥬얼\VC\Tools\MSVC\14.27.29110\include\xstring(4564,17): message : 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>' 선언을 참조하십시오.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(56,36): warning C4474: 'sprintf' : 서식 문자열에 전달된 인수가 너무 많습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(56,36): message : 자리 표시자 및 해당 매개 변수에는 variadic 인수가 0개 필요하지만 4개가 제공되었습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(57,7): warning C4245: '인수': 'int'에서 'DWORD'(으)로의 변환입니다. signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(57,7): warning C4245: '인수': 'int'에서 'UINT'(으)로의 변환입니다. signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\LoadManager.cpp(56,4): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-  Main.cpp
-  Render3DManager.cpp
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(55): warning C4238: 비표준 확장이 사용됨: 클래스 rvalue를 lvalue로 사용했습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(55,43): warning C4238: 비표준 확장이 사용됨: 클래스 rvalue를 lvalue로 사용했습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(55,66): warning C4238: 비표준 확장이 사용됨: 클래스 rvalue를 lvalue로 사용했습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(55,90): warning C4238: 비표준 확장이 사용됨: 클래스 rvalue를 lvalue로 사용했습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(41,9): warning C4189: 'Attribute': 지역 변수가 초기화되었으나 참조되지 않았습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(79,2): warning C4456: 'i' 선언은 이전 로컬 선언을 숨깁니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(78,6): message : 'i' 선언을 참조하십시오.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(79,20): warning C4018: '<': signed 또는 unsigned가 일치하지 않습니다.
-C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Render3DManager.cpp(78,6): warning C4189: 'i': 지역 변수가 초기화되었으나 참조되지 않았습니다.
+﻿  BoundingBox.cpp
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\boundingbox.cpp(121): warning C4458: 'radius' 선언은 클래스 멤버를 숨깁니다.
+  c:\users\taewo\onedrive\바탕 화면\다렉\3dex\boundingbox.h(6): note: 'cBoundSphere::radius' 선언을 참조하십시오.
+  Player.cpp
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\player.cpp(59): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\player.cpp(65): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\player.cpp(71): warning C4244: '인수': 'double'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\player.cpp(96): warning C4244: '인수': 'double'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Render2DManager.cpp
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\render2dmanager.cpp(41): warning C4244: '인수': 'float'에서 'INT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\render2dmanager.cpp(46): warning C4244: '인수': 'float'에서 'INT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+c:\users\taewo\onedrive\바탕 화면\다렉\3dex\render2dmanager.cpp(47): warning C4244: '인수': 'double'에서 'FLOAT'(으)로 변환하면서 데이터가 손실될 수 있습니다.
   코드를 생성하고 있습니다...
-CamManager.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/SAFESEH' 사양으로 인해 무시됩니다.
-  FPS_3D_2010.vcxproj -> C:\Users\taewo\Desktop\DirectXSamples\FPS_3D\Debug\FPS_3D.exe
+BoundingBox.obj : warning LNK4075: '/EDITANDCONTINUE'이(가) '/SAFESEH' 사양으로 인해 무시됩니다.
+  FPS_3D_2010.vcxproj -> C:\Users\taewo\OneDrive\바탕 화면\다렉\3DEX\Debug\FPS_3D.exe

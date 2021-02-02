@@ -3,6 +3,18 @@
 class Player : public Object
 {
 private :
+	MultiMesh * LeftPunch;
+	MultiMesh * RightPunch;
+	MultiMesh * RollPunch;
+	MultiMesh * LeftUper;
+
+	CDXUTTimer * timer; 
+	bool BackRoll = false;
+	bool LEftRoll = false;
+	bool RightRoll = false;
+	bool FrontRoll = false;
+	bool Right_Punch = false;
+	bool Left_Uper = false;
 	PCURSORINFO* info;
 	HWND hand;
 	Vec3 CamPos,CamR , CamAt;
@@ -18,6 +30,8 @@ private :
 	LPCDIDATAFORMAT maat;
 	HINSTANCE hInst;
 	MultiMesh* mesh;
+	MultiMesh* meshRun;
+
 	IDirectInput8 * pt;
 	IDirectInputDevice8* InputDevice;
 

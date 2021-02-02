@@ -214,53 +214,53 @@ bool Collision::BoxColl(Transform* tsA, Transform* tsB)
 	Vec3 centerB;
 
 	centerA = tsA->Pos;
-	centerB = tsB->Pos;
-	centerA.y = tsA->Pos.y + (tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.x;
-	centerB.y = tsB->Pos.y + (tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsA->Size.x;
+	centerB = tsB->Pos ;
+	centerA.y = tsA->Pos.y + (tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y/2;
+	centerB.y = tsB->Pos.y + (tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y/2;
 	RECT rt, rt1, rt2, rt3, rt4;
-	
+	if (tsA->timer->GetTime() <= 0.5)
+	{
 		rt1 = {
-			LONG((centerA.x - ((tsA->GetMesh->maxVec.x - tsA->GetMesh->minVec.x) * tsA->Size.x))),
-			LONG((centerA.y - ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y) / 2)) ,
-			LONG((centerA.x + ((tsA->GetMesh->maxVec.x - tsA->GetMesh->minVec.x) * tsA->Size.x))) ,
-			LONG((centerA.y + ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y) / 2)) };
+			LONG((centerA.x - ((tsA->GetMesh->maxVec.x - tsA->GetMesh->minVec.x) * tsA->Size.x)/2)),
+			LONG((centerA.y + ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y)/2 )) ,
+			LONG((centerA.x + ((tsA->GetMesh->maxVec.x - tsA->GetMesh->minVec.x) * tsA->Size.x)/2)) ,
+			LONG((centerA.y - ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y)/2)) };
 		rt2 = {
-			LONG((centerB.x - ((tsB->GetMesh->maxVec.x - tsB->GetMesh->minVec.x) * tsB->Size.x))) ,
-			LONG((centerB.y - ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y) / 2)),
-			LONG((centerB.x + ((tsB->GetMesh->maxVec.x - tsB->GetMesh->minVec.x) * tsB->Size.x))) ,
-			LONG((centerB.y + ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y) / 2)) ,
+			LONG((centerB.x - ((tsB->GetMesh->maxVec.x - tsB->GetMesh->minVec.x) * tsB->Size.x)/2)) ,
+			LONG((centerB.y + ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y)/2 )),
+			LONG((centerB.x + ((tsB->GetMesh->maxVec.x - tsB->GetMesh->minVec.x) * tsB->Size.x)/2)) ,
+			LONG((centerB.y - ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y)/2)) ,
 
 		};
 		rt3 =
 		{
-			LONG((centerA.z - ((tsA->GetMesh->maxVec.z - tsA->GetMesh->minVec.z) * tsA->Size.z) / 1.85)),
-			LONG((centerA.y - ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y) / 1.85)) ,
-			LONG((centerA.z + ((tsA->GetMesh->maxVec.z - tsA->GetMesh->minVec.z) * tsA->Size.z) / 1.85)),
-			LONG((centerA.y + ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y) / 1.85))
+			LONG((centerA.z - ((tsA->GetMesh->maxVec.z - tsA->GetMesh->minVec.z) * tsA->Size.z)/2)),
+			LONG((centerA.y + ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y)/2 )) ,
+			LONG((centerA.z + ((tsA->GetMesh->maxVec.z - tsA->GetMesh->minVec.z) * tsA->Size.z) /2)),
+			LONG((centerA.y - ((tsA->GetMesh->maxVec.y - tsA->GetMesh->minVec.y) * tsA->Size.y) / 2))
 		};
 		rt4 =
 		{
-			LONG((centerA.z - ((tsB->GetMesh->maxVec.z - tsB->GetMesh->minVec.z) * tsB->Size.z) / 1.85)),
-			LONG((centerA.y - ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y) / 1.85)) ,
-			LONG((centerA.z + ((tsB->GetMesh->maxVec.z - tsB->GetMesh->minVec.z) * tsB->Size.z) / 1.85)) ,
-			LONG((centerA.y + ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y) / 1.85))
+			LONG((centerB.z - ((tsB->GetMesh->maxVec.z - tsB->GetMesh->minVec.z) * tsB->Size.z)/2 )),
+			LONG((centerB.y + ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y) / 2)) ,
+			LONG((centerB.z + ((tsB->GetMesh->maxVec.z - tsB->GetMesh->minVec.z) * tsB->Size.z)/2)) ,
+			LONG((centerB.y - ((tsB->GetMesh->maxVec.y - tsB->GetMesh->minVec.y) * tsB->Size.y) / 2))
 		};
-	
-	if (tsA->timer->GetTime() <= 0.1)
-	{
-		if (
-			tsA->Pos.x + rt1.left >= tsB->Pos.x + rt2.left &&
-			tsA->Pos.x + rt1.right <= tsB->Pos.x + rt2.right &&
-			tsA->Pos.y + rt1.top >= tsB->Pos.y + rt2.top &&
-			tsA->Pos.y + rt1.bottom <= tsB->Pos.y + rt2.bottom &&
-			tsA->Pos.z + rt3.right <= tsB->Pos.z + rt4.right &&
-			tsA->Pos.z + rt3.left >= tsB->Pos.z + rt4.left)
-		{
-			return true;
-		}
 		tsA->timer->Reset();
 
 	}
+
+
+	
+		if (rt1.bottom<=rt2.top&rt1.left<=rt2.right&&rt1.right >= rt2.left&&rt1.bottom <= rt2.top)
+		{
+			if (rt3.left <= rt4.right&& rt3.right >= rt4.left)
+			{
+			return true;
+
+			}
+		}
+		
 
 	if (tsA->timer->GetTime() >= 0.5)
 	{
