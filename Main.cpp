@@ -37,7 +37,10 @@ void Main::Init()
 	ts.SetPos(Vec3(0,-10,0));
 	ts.SetRot(Vec3(0, 0, 0));
 	ts.SetScale(Vec3(10,10,10));
-	
+	tts.SetPos(Vec3(0,0,0));
+	tts.SetRot(Vec3(0,0,0));
+	tts.SetScale(Vec3(1,1,1));
+	tts.SetWorldMatrix();
 }
 
 void Main::Update()
@@ -49,10 +52,10 @@ void Main::Update()
 void Main::Render()
 {
 	
+	RENDER3D->BoxRender(tts);
 
 	SCENE->Render();
 	OBJMANAGER->Render();
-	
 	RENDER2D->Begin();
 	SCENE->UIRender();
 	OBJMANAGER->UIRender();

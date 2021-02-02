@@ -6,6 +6,7 @@ private:
 	Texture* text;
 	float x=0;
 	float y=0;
+	Transform tts;
 	MultiMesh* meshs;
 	Transform ts;
 public:

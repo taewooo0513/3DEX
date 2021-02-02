@@ -21,6 +21,7 @@ public:
 	Render3DManager();
 	~Render3DManager();
 public:
+	void BoxRender(Transform ts);
 	void Render(Mesh* mesh, Transform transform);
 	void BackRender(Mesh* mesh, Transform transform);
 

@@ -38,4 +38,8 @@ void NormalEnemy::UIRender()
 
 void NormalEnemy::Collision(Object* obj)
 {
+	if (obj->ObjTag == "Player")
+	{
+		cout << "황진영섹스";
+	}
 }

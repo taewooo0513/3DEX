@@ -67,6 +67,20 @@ Render3DManager::~Render3DManager()
 	vb->Release();
 }
 
+void Render3DManager::BoxRender(Transform ts)
+{
+	LPD3DXMESH  mesh;
+	LPD3DXBUFFER bf;
+	
+	D3DXCreateBox(Device,ts.Size.x, ts.Size.y, ts.Size.z, &mesh,&bf);
+	Device->SetTransform(D3DTS_WORLD,&ts.GetMat());
+	Device->SetTexture(0,LOADER->AddImage("sex","./Resource/sex.png")->texturePtr);
+	mesh->DrawSubset(0);
+	mesh->Release();
+	
+	bf->Release();
+}
+
 void Render3DManager::Render(Mesh* mesh, Transform transform)
 {
 	Device->SetTransform(D3DTS_WORLD, &transform.matW);

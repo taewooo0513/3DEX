@@ -252,7 +252,7 @@ bool Collision::BoxColl(Transform* tsA, Transform* tsB)
 
 
 	
-		if (rt1.bottom<=rt2.top&rt1.left<=rt2.right&&rt1.right >= rt2.left&&rt1.bottom <= rt2.top)
+		if (rt1.bottom<=rt2.top&rt1.left<=rt2.right&&rt1.right >= rt2.left&&rt2.bottom <= rt1.top)
 		{
 			if (rt3.left <= rt4.right&& rt3.right >= rt4.left)
 			{
