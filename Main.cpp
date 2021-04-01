@@ -13,6 +13,8 @@ Main::~Main()
 
 void Main::Init()
 {
+	LOADER->AddImages("HitEffect", "./Resource/HitEffect/", 4);
+
 	//Run_000001
 	//씬
 	SCENE->AddScene("ingame",new ingameScene);
@@ -22,6 +24,8 @@ void Main::Init()
 	LOADER->AddMesh("BackGround","./Resource/BG1.obj");
 	LOADER->AddMesh("BacksGround", "./Resource/Run/Run_000001.obj");
 	LOADER->AddMesh("Block","./Resource/DirtBlock.obj");
+	LOADER->AddMesh("CollBox", "./Resource/CollBox.obj");
+
 	//3D 애니메이션
 	LOADER->AddMeshs("PlayerRun","./Resource/Run/(",21);
 	LOADER->AddMeshs("PlayerIdle", "./Resource/Idle/(", 57);
@@ -32,7 +36,7 @@ void Main::Init()
 
 	//2D 이미지
 	LOADER->AddImage("fdas","./media/cup.jpg");
-	
+	//2D 애니메
 	SCENE->ChangeScene("ingame");
 	ts.SetPos(Vec3(0,-10,0));
 	ts.SetRot(Vec3(0, 0, 0));

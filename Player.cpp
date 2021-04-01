@@ -1,8 +1,11 @@
 #include "DXUT.h"
 #include "Player.h"
+#include "CollisionBox.h"
 
 Player::Player()
 {
+	hiteffect = LOADER->FindImages("HitEffect");
+	OBJMANAGER->m_Player = this;
 	ts.timer = new CDXUTTimer;
 	ts.timer->Start();
 	CollKind = "¹Ú½º";
@@ -12,6 +15,7 @@ Player::Player()
 	mesh = LOADER->FindMeshs("PlayerIdle");
 	meshRun = LOADER->FindMeshs("PlayerRun");
 	LeftPunch = LOADER->FindMeshs("PlayerLeftPunch");
+	SetHp(10);
 	RightPunch = LOADER->FindMeshs("PlayerRightPunch");
 	RollPunch = LOADER->FindMeshs("PlayerRoll");
 	ObjTag = "Player";
@@ -29,6 +33,9 @@ Player::Player()
 
 	}
 	ts.SetRot(Vec3(D3DXToDegree(radius + 1.55), 0, 0));
+	ttts.timer = new CDXUTTimer;
+
+
 
 }
 
@@ -39,12 +46,19 @@ Player::~Player()
 
 void Player::Update()
 {
+	for (auto iter : CollObj)
+	{
+		iter->UpdatePos(iter->ts.Pos);
+	}
+	//ttts = ts;
+
 	for (auto iter : mesh->v_mesh)
 	{
 		ts.GetMesh = iter;
 
 	}
 
+		
 	GetCursorPos(&ptf);
 	if (DXUTIsKeyDown(VK_SPACE))
 	{
@@ -110,6 +124,8 @@ void Player::Update()
 	}
 	if (Left_Uper == true)
 	{
+		
+		
 		if (timer->GetTime() >= 0.75)
 		{
 			Left_Uper = false;
@@ -119,6 +135,7 @@ void Player::Update()
 	}
 	if (Right_Punch == true)
 	{
+		
 		if (timer->GetTime() >= 0.75)
 		{
 			Right_Punch = false;
@@ -242,12 +259,24 @@ void Player::Update()
 	}
 	else if (DXUTIsKeyDown(VK_LBUTTON))
 	{
+		ttts.SetPos(Vec3(pos.x +3 * Dir.x, 3, pos.z + 3 * Dir.y));
+		ttts.SetRot(Vec3(0, 0, 0));
+		ttts.SetScale(Vec3(1, 1, 1));
+		ttts.GetMesh = ts.GetMesh;
+		ttts.SetWorldMatrix();
+		CollObj.push_back(OBJMANAGER->AddObject(new CollisionBox(ttts,true,"",0.75),1));
 		timer->Start();
 		Left_Uper = true;
-		
+
 	}
 	else if (DXUTIsKeyDown(VK_RBUTTON))
 	{
+		ttts.SetPos(Vec3(pos.x + 3 * Dir.x, 3, pos.z + 3 * Dir.y));
+		ttts.SetRot(Vec3(0, 0, 0));
+		ttts.SetScale(Vec3(1, 1, 1));
+		ttts.GetMesh = ts.GetMesh;
+		ttts.SetWorldMatrix();
+		CollObj.push_back(OBJMANAGER->AddObject(new CollisionBox(ttts, true, "", 0.75), 1));
 		timer->Start();
 		Right_Punch = true;
 
@@ -266,10 +295,10 @@ void Player::Update()
 
 void Player::Render()
 {
+	//hiteffect->Render(0.03,ts);
 	if (LEftRoll || RightRoll || FrontRoll || BackRoll)
 	{
 		RollPunch->Render(0.01, ts);
-
 	}
 	else if (Right_Punch)
 	{
@@ -277,6 +306,8 @@ void Player::Render()
 	}
 	else if (Left_Uper)
 	{
+		ts.SetScale(Vec3(-0.2, 0.2, 0.2));
+
 		LeftUper->Render(0.01,ts);
 	}
 	else
@@ -284,7 +315,8 @@ void Player::Render()
 		LeftPunch->i = 0;
 		LeftUper->i = 0;
 		RollPunch->i = 0;
-	
+		ts.SetScale(Vec3(0.2, 0.2, 0.2));
+
 		
 		if (DXUTIsKeyDown(0x57))
 		{
@@ -321,11 +353,13 @@ void Player::Render()
 	//ts.Pos = Vec3(0, 0, 0);
 	ts.SetPos(pos);
 
-	ts.SetScale(Vec3(0.2, 0.2, 0.2));
 	ts.SetWorldMatrix();
 	//mesh->Render(0.03, ts);
 
-
+	if (Hp <= 0)
+	{
+		ObjDel();
+	}
 }
 
 void Player::UIRender()
@@ -336,5 +370,12 @@ void Player::Collision(Object* obj)
 {
 	if (obj->ObjTag == "Block")
 	{
+	}
+	if (obj->ObjTag == "NormalEnemy")
+	{
+		Hp--;
+		Dir = Vec2(cosf(-radius - 3.14), sinf(-radius - 3.14));
+		pos.x += Dir.x * 5;
+		pos.z += Dir.y * 5;
 	}
 }

@@ -74,7 +74,7 @@ void Render3DManager::BoxRender(Transform ts)
 	
 	D3DXCreateBox(Device,ts.Size.x, ts.Size.y, ts.Size.z, &mesh,&bf);
 	Device->SetTransform(D3DTS_WORLD,&ts.GetMat());
-	Device->SetTexture(0,LOADER->AddImage("sex","./Resource/sex.png")->texturePtr);
+	Device->SetTexture(0,0);
 	mesh->DrawSubset(0);
 	mesh->Release();
 	

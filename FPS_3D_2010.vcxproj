@@ -390,6 +390,8 @@
     <ClCompile Include="BoundingBox.cpp" />
     <ClCompile Include="CamManager.cpp" />
     <ClCompile Include="Collision.cpp" />
+    <ClCompile Include="CollisionBox.cpp" />
+    <ClCompile Include="cPlayer.cpp" />
     <ClCompile Include="DirtBlock.cpp" />
     <ClCompile Include="EXObject.cpp" />
     <ClCompile Include="GizmoManager.cpp" />
@@ -408,6 +410,8 @@
     <ClInclude Include="BoundingBox.h" />
     <ClInclude Include="CamManager.h" />
     <ClInclude Include="Collision.h" />
+    <ClInclude Include="CollisionBox.h" />
+    <ClInclude Include="cPlayer.h" />
     <ClInclude Include="DirtBlock.h" />
     <ClInclude Include="EXObject.h" />
     <ClInclude Include="GizmoManager.h" />

@@ -13,6 +13,7 @@ NormalEnemy::NormalEnemy(Vec3 pos)
 	ts.SetRot(Vec3(0,0,0));
 	ts.SetScale(Vec3(0.4,0.4,0.4));
 	ts.GetMesh = mesh;
+	Hp = 5;
 	GravityOn = true;
 }
 
@@ -22,8 +23,16 @@ NormalEnemy::~NormalEnemy()
 
 void NormalEnemy::Update()
 {
-	ts.SetPos(pos);
+	if (Hp <= 0)
+	{
+		Die = true;
 
+	}
+
+	ts.SetPos(pos);
+	D3DXVec3Normalize(&PP,&Vec3(OBJMANAGER->m_Player->ts.Pos - pos));
+	pos += PP *10* DXUTGetElapsedTime();
+	pos.y = 0.5;
 }
 
 void NormalEnemy::Render()
@@ -38,8 +47,5 @@ void NormalEnemy::UIRender()
 
 void NormalEnemy::Collision(Object* obj)
 {
-	if (obj->ObjTag == "Player")
-	{
-		cout << "황진영섹스";
-	}
+
 }

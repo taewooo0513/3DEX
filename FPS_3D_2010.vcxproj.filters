@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns:atg="http://atg.xbox.com" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Resource Files">
-      <UniqueIdentifier>{8e114980-c1a3-4ada-ad7c-83caadf5daeb}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
-    </Filter>
     <Filter Include="DXUT">
       <UniqueIdentifier>{a43c5c25-0e86-4a20-b64a-883785ff74fd}</UniqueIdentifier>
     </Filter>
@@ -50,6 +46,19 @@
     </Filter>
     <Filter Include="Manager\Scene">
       <UniqueIdentifier>{d465cf00-795b-41c3-89f8-8ecd815b45b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{8e114980-c1a3-4ada-ad7c-83caadf5daeb}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="Object\CollBox">
+      <UniqueIdentifier>{cd62ae69-f95c-4936-a01f-a15dcc1789fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\DirtBlock">
+      <UniqueIdentifier>{fbffd704-6d1a-4e7a-a037-66246268b24f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Player">
+      <UniqueIdentifier>{94b1377a-3437-4812-b3db-f1723338b440}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -139,9 +148,6 @@
     <ClCompile Include="CamManager.cpp">
       <Filter>Manager\Cam</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>Object</Filter>
-    </ClCompile>
     <ClCompile Include="BoundingBox.cpp">
       <Filter>안쓰는거</Filter>
     </ClCompile>
@@ -161,8 +167,19 @@
       <Filter>안쓰는거</Filter>
     </ClCompile>
     <ClCompile Include="ingameScene.cpp" />
-    <ClCompile Include="DirtBlock.cpp" />
-    <ClCompile Include="NormalEnemy.cpp" />
+    <ClCompile Include="CollisionBox.cpp">
+      <Filter>Object\CollBox</Filter>
+    </ClCompile>
+    <ClCompile Include="DirtBlock.cpp">
+      <Filter>Object\DirtBlock</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Object\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="NormalEnemy.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="cPlayer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="MeshLoader.h">
@@ -192,9 +209,6 @@
     <ClInclude Include="CamManager.h">
       <Filter>Manager\Cam</Filter>
     </ClInclude>
-    <ClInclude Include="Player.h">
-      <Filter>Object</Filter>
-    </ClInclude>
     <ClInclude Include="Render3DManager.h">
       <Filter>Manager\Render\3D</Filter>
     </ClInclude>
@@ -217,8 +231,19 @@
       <Filter>안쓰는거</Filter>
     </ClInclude>
     <ClInclude Include="ingameScene.h" />
-    <ClInclude Include="DirtBlock.h" />
-    <ClInclude Include="NormalEnemy.h" />
+    <ClInclude Include="CollisionBox.h">
+      <Filter>Object\CollBox</Filter>
+    </ClInclude>
+    <ClInclude Include="DirtBlock.h">
+      <Filter>Object\DirtBlock</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Object\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="NormalEnemy.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="cPlayer.h" />
   </ItemGroup>
   <ItemGroup>
     <CLInclude Include="resource.h">

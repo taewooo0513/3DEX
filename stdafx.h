@@ -39,22 +39,7 @@ public:
 	{
 	}
 };
-struct MultiTexture
-{
-public:
-	list<Texture*> l_Texture;
 
-public:
-	MultiTexture(Texture* texturePtr)
-	{
-		l_Texture.push_back(texturePtr);
-	}
-
-	~MultiTexture()
-	{
-
-	}
-};
 
 struct Material
 {
@@ -196,3 +181,5 @@ struct Transform
 #include "Collision.h"
 #include "GizmoManager.h"
 #include "Collision.h"
+
+

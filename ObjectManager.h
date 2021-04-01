@@ -10,8 +10,9 @@ public:
 	list <Object* > L_obj[10];
 	ObjectManager();
 	~ObjectManager();
+	Object *m_Player;
 public:
-	void AddObject(Object *obj,int Tag);
+	Object* AddObject(Object *obj,int Tag);
 	void Update();
 	void Render();
 	void UIRender();

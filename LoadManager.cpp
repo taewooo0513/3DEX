@@ -57,21 +57,29 @@ MultiTexture* LoadManager::AddImages(const string& key, const string& Folder, in
 	auto find = m_MultiTexture.find(key);
 	if (find == m_MultiTexture.end())
 	{
-		D3DXIMAGE_INFO info;
-		LPDIRECT3DTEXTURE9 texturePtr;
-		for (int i = 0; i > count; i++)
+		MultiTexture* Multi = new MultiTexture();
+
+		for (int i = 0; i < count; i++)
 		{
-			char a;
-			sprintf(&a, "./Resouce/image/", Folder, "/", count, ".png");
-			if (D3DXCreateTextureFromFileExA(Device, to_string(a).c_str(), -2, -2, 0, 0, D3DFMT_UNKNOWN, D3DPOOL_DEFAULT, -1, -1, 0, &info, nullptr, &texturePtr) == S_OK)
+			D3DXIMAGE_INFO info;
+			LPDIRECT3DTEXTURE9 texturePtr;
+			string a;
+			a = Folder;
+			a.push_back(to_string(i).at(0));
+			a.push_back('.');
+			a.push_back('p');
+			a.push_back('n');
+			a.push_back('g');
+			if (D3DXCreateTextureFromFileExA(Device, a.c_str(), D3DX_DEFAULT_NONPOW2, D3DX_DEFAULT_NONPOW2, 0, 0, D3DFMT_UNKNOWN, D3DPOOL_MANAGED, D3DX_DEFAULT, D3DX_DEFAULT, 0, &info, nullptr, &texturePtr) == S_OK)
 			{
 				Texture* text = new Texture(texturePtr, info);
-				MultiTexture* Multi = new MultiTexture(text);
-				m_MultiTexture[key] = Multi;
-
+				Multi->v_Text.push_back(text);
+				cout << a;
 			}
 		}
-		return nullptr;
+		m_MultiTexture[key] = Multi;
+
+		return m_MultiTexture[key];
 	}
 	return find->second;
 }
@@ -86,7 +94,7 @@ Texture* LoadManager::FindImage(const string& key)
 	return find->second;
 }
 
-MultiTexture* LoadManager::FindImages(const string& key, int count)
+MultiTexture* LoadManager::FindImages(const string& key)
 {
 	auto find = m_MultiTexture.find(key);
 	if (find == m_MultiTexture.end())
@@ -122,7 +130,7 @@ MultiMesh* LoadManager::AddMeshs(const string& key, string strFilename, int coun
 	MultiMesh* meshs = new MultiMesh;
 	for (int i = 1; i <= count; i++)
 	{
-	Mesh* mesh = new Mesh;
+		Mesh* mesh = new Mesh;
 		string path = strFilename;
 		if (i < 10)
 		{
@@ -135,20 +143,20 @@ MultiMesh* LoadManager::AddMeshs(const string& key, string strFilename, int coun
 			path.push_back(to_string(i).at(1));
 		}
 
-			path.push_back('.');
-			path.push_back('o');
-			path.push_back('b');
-			path.push_back('j');
+		path.push_back('.');
+		path.push_back('o');
+		path.push_back('b');
+		path.push_back('j');
 
 
-		cout << path ;
+		cout << path;
 
 		Loader->ObjLoad(mesh, path);
-		
+
 
 		meshs->v_mesh.push_back(mesh);
 	}
-		m_MultiMesh.insert(make_pair(key, meshs));
+	m_MultiMesh.insert(make_pair(key, meshs));
 
 
 	return m_MultiMesh[key];

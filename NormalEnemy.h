@@ -5,6 +5,7 @@ class NormalEnemy :public Object
 private :
 	Mesh * mesh;
 	Vec3 pos;
+	Vec3 PP;
 public:
 	NormalEnemy(Vec3 pos);
 	virtual ~NormalEnemy();

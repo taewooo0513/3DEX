@@ -9,11 +9,12 @@ ObjectManager::~ObjectManager()
 {
 }
 
-void ObjectManager::AddObject(Object* obj, int Tag)
+Object *ObjectManager::AddObject(Object* obj, int Tag)
 {
 	if (obj == nullptr)
-		return;
+		return nullptr;
 	L_obj[Tag].push_back(obj);
+	return obj;
 }
 
 void ObjectManager::Update()
@@ -24,6 +25,7 @@ void ObjectManager::Update()
 		for (auto iter = L_obj[i].begin(); iter != L_obj[i].end();)
 		{
 			(*iter)->Update();
+		
 			if ((*iter)->GravityOn == true)
 			{
 				Gravity(*iter);
@@ -51,13 +53,12 @@ void ObjectManager::Update()
 									(*iter)->Collision(iter_);
 								}
 						}
-
 					}
 				}
 			}
 			if ((*iter)->ObjDie() == true)
 			{
-				delete(*iter);
+				SAFE_DELETE(*iter);
 				iter = L_obj[i].erase(iter);
 			}
 			else iter++;
@@ -95,7 +96,7 @@ void ObjectManager::Release()
 	{
 		for (auto iter : L_obj[i])
 		{
-			iter->UIRender();
+			SAFE_DELETE(iter);
 		}
 		L_obj[i].clear();
 	}

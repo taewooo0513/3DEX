@@ -3,11 +3,12 @@
 class Player : public Object
 {
 private :
+
 	MultiMesh * LeftPunch;
 	MultiMesh * RightPunch;
 	MultiMesh * RollPunch;
 	MultiMesh * LeftUper;
-
+	MultiTexture * hiteffect;
 	CDXUTTimer * timer; 
 	bool BackRoll = false;
 	bool LEftRoll = false;
@@ -31,10 +32,10 @@ private :
 	HINSTANCE hInst;
 	MultiMesh* mesh;
 	MultiMesh* meshRun;
-
+	list <Object *> CollObj;
 	IDirectInput8 * pt;
 	IDirectInputDevice8* InputDevice;
-
+	Transform ttts;
 public:
 	Player();
 	virtual ~Player();
